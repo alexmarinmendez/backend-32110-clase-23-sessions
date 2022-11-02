@@ -20,3 +20,25 @@ app.get('/connect', (req, res) => {
     req.session.counter = 1
     res.send({ messge: `Bienvenido! Esta es la ${req.session.counter}era vez que nos visitas!`})
 })
+
+app.get('/login', (req, res) => {
+    let { username , password } = req.query
+    //buscar el user en la BD
+    if (username!=='alex' || password!='coder') {
+        return res.send({err: 'Usuario o contraseña incorrectos'})
+    }
+    req.session.user = {
+        username,
+        role: 'admin'
+    }
+    res.send({message: 'Usuario logueado correctamente'})
+})
+
+const isAdmin = (req, res, next) => {
+    if (req.session.user&&req.session.user.role==='admin') return next()
+    else return res.status(401).send({err: 'No autorizado'})
+}
+
+app.get('/ruta-secreta', isAdmin, (req, res) => {
+    res.send({message: "Si estas autorizado!"})
+})
